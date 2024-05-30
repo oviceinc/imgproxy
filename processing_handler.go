@@ -264,6 +264,14 @@ func handleProcessing(reqID string, rw http.ResponseWriter, r *http.Request) {
 
 	imgRequestHeader := make(http.Header)
 
+	// Pass referer header from the original request.
+	headers := []string{"referer"}
+	for _, header := range headers {
+		if value := r.Header.Get(header); len(value) != 0 {
+			imgRequestHeader.Set(header, value)
+		}
+	}
+
 	var etagHandler etag.Handler
 
 	if config.ETagEnabled {
