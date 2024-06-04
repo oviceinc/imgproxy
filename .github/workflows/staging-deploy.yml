@@ -1,0 +1,48 @@
+name: Staging Deploy
+
+on:
+  push:
+    branches: [master,Firas/SRE-2123]
+
+env:
+  ECR_REPOSITORY: 798768055195.dkr.ecr.ap-northeast-1.amazonaws.com/imgproxy
+
+permissions: write-all
+
+jobs:
+  build-image:
+    name: Build Image
+
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.IMAGE_TAG }}
+      image_repo: ${{ env.ECR_REPOSITORY }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Image Tag
+        id: image_tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::798768055195:role/DeployBot
+          aws-region: ap-northeast-1
+          mask-aws-account-id: 'no'
+
+      - name: Docker build, scan and push
+        uses: oviceinc/actions/docker-scanner@main
+        with:
+          AWS_ECR_REPO_URL: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          DOCKER_PLATFORMS: linux/amd64
+          DOCKER_CONTEXT: .
+          DOCKER_FILE: ./docker/Dockerfile
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_VULNERABILITIES }}
