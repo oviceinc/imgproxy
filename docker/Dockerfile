@@ -11,22 +11,22 @@ RUN docker/build.sh
 # ==================================================================================================
 # Final image
 
-FROM ubuntu:mantic
+FROM ubuntu:plucky
 LABEL maintainer="Sergey Alexandrovich <darthsim@gmail.com>"
 
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    libstdc++6 \
-    liblzma5 \
-    libzstd1 \
-    fontconfig-config \
-    fonts-dejavu-core \
-    media-types \
-    libjemalloc2 \
-    libtcmalloc-minimal4 \
+  bash \
+  ca-certificates \
+  libstdc++6 \
+  liblzma5 \
+  libzstd1 \
+  fontconfig-config \
+  fonts-dejavu-core \
+  media-types \
+  libjemalloc2 \
+  libtcmalloc-minimal4 \
   && ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so \
   && ln -s /usr/lib/$(uname -m)-linux-gnu/libtcmalloc_minimal.so.4 /usr/local/lib/libtcmalloc_minimal.so \
   && rm -rf /var/lib/apt/lists/*
